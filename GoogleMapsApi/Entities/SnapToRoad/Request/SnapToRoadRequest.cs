@@ -29,6 +29,8 @@ namespace GoogleMapsApi.Entities.SnapToRoad.Request
 		{
 			if (Path == null)
 				throw new ArgumentException("Must specify a Path");
+			if (Path.Count() > 100)
+				throw new ArgumentException("The Roads API takes up to 100 GPS points");
 			var parameters = base.GetQueryStringParameters();
 
 			IEnumerable<string> x = Path.Select(p => p.LocationString);
