@@ -22,6 +22,8 @@ using GoogleMapsApi.Entities.PlacesNearBy.Request;
 using GoogleMapsApi.Entities.PlacesNearBy.Response;
 using GoogleMapsApi.Entities.PlacesFind.Response;
 using GoogleMapsApi.Entities.PlacesFind.Request;
+using GoogleMapsApi.Entities.SnapToRoad.Response;
+using GoogleMapsApi.Entities.SnapToRoad.Request;
 using System;
 
 namespace GoogleMapsApi
@@ -132,6 +134,14 @@ namespace GoogleMapsApi
             get
             {
                 return EngineFacade<DistanceMatrixRequest, DistanceMatrixResponse>.Instance;
+            }
+        }
+
+        public static IEngineFacade<SnapToRoadRequest, SnapToRoadResponse> SnapToRoad
+        {
+            get
+            {
+                return EngineFacade<SnapToRoadRequest, SnapToRoadResponse>.Instance;
             }
         }
 
