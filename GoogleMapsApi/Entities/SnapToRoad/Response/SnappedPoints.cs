@@ -12,13 +12,13 @@ namespace GoogleMapsApi.Entities.SnapToRoad.Response
     public class SnappedPoint
     {
         [DataMember(Name = "location")]
-        LatitudeLongitudeLiteral Location { get; set; } // Required
+        public LatitudeLongitudeLiteral Location { get; set; } // Required
 
         [DataMember(Name = "placeId")]
-        string PlaceId { get; set; } //Required
+        public string PlaceId { get; set; } //Required
 
         [DataMember(Name = "originalIndex")]
-        string OriginalIndex { get; set; }
+        public string OriginalIndex { get; set; }
         
     }
 }

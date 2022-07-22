@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 namespace GoogleMapsApi.Entities.SnapToRoad.Response
 {
 	[DataContract]
-	internal class LatitudeLongitudeLiteral
+	public class LatitudeLongitudeLiteral
 	{
 		[DataMember(Name = "latitude")]
-		public decimal Latitude { get; set; }
+		public double Latitude { get; set; }
 
 		[DataMember(Name = "longitude")]
-		public decimal Longitude { get; set; }
+		public double Longitude { get; set; }
 	}
 }

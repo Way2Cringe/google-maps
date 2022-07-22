@@ -10,9 +10,9 @@ namespace GoogleMapsApi.Entities.SnapToRoad.Response
     public class SnapToRoadResponse : IResponseFor<SnapToRoadRequest>
     {
         [DataMember(Name = "snappedPoints")]
-        IEnumerable<SnappedPoint> SnappedPoints { get; set; }
+        public IEnumerable<SnappedPoint> SnappedPoints { get; set; }
 
         [DataMember(Name = "warningMessage")]
-        string WarningMessage { get; set; }
+        public string WarningMessage { get; set; }
     }
 }
