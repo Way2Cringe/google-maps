@@ -16,6 +16,8 @@ namespace GoogleMapsApi.App.Pages
 
         public bool CanShow = false;
 
+        string MarshrutLineColor = "#340573";
+
         Dictionary<string, TravelMode> dictionaryMode = new Dictionary<string, TravelMode>
         {
             {"car",  TravelMode.Driving},
@@ -51,11 +53,11 @@ namespace GoogleMapsApi.App.Pages
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
             {
                 Task.Run(() => GetDirectionResponse(addresTo, addresFrom, select)).Wait();
-                ImagePolylineSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByPolyline()), "green");
-                ImagePathSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByStep()), "black");
+                ImagePolylineSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByPolyline()), MarshrutLineColor);
+                ImagePathSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByStep()), MarshrutLineColor);
                 var snapPath = Task.Run(()=> GetStaticMapBySnapStep());
-                ImageSnapPathSrc = GetStaticMapByPoints(RemoveExtraPoints(snapPath.Result), "blue");
-                ImageSnapPolylineSrc = GetStaticMapByPoints(RemoveExtraPoints((Task.Run(() => GetStaticMapBySnapPolyline())).Result), "purple");
+                ImageSnapPathSrc = GetStaticMapByPoints(RemoveExtraPoints(snapPath.Result), MarshrutLineColor);
+                ImageSnapPolylineSrc = GetStaticMapByPoints(RemoveExtraPoints((Task.Run(() => GetStaticMapBySnapPolyline())).Result), MarshrutLineColor);
                 string[] separator = { " ", ",", ".", "-" };
                 var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
