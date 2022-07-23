@@ -11,10 +11,9 @@ namespace GoogleMapsApi.App.Pages
     public class IndexModel : PageModel
     {
         string src = "https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727";
-        string dynamicSrc = "https://www.google.com/maps/embed/v1/directions?origin=24+Sussex+Drive+Ottawa+ON&destination=10+Sussex+Drive+Ottawa+ON&key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI";
-        
+        string baseDynamic = "https://www.google.com/maps/embed/v1/directions?";
         public string ImageSrc { set { src = value; } get { return src; } }
-        public string ImageDynamicSrc { set { dynamicSrc = value; } get { return dynamicSrc; } }
+        public string ImageDynamicSrc { set; get; } = "https://www.google.com/maps/embed/v1/directions?origin=24+Sussex+Drive+Ottawa+ON&destination=10+Sussex+Drive+Ottawa+ON&key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI";
         public string ErrorMessage { get; set; }
         private readonly ILogger<IndexModel> _logger;
         string ApiKey
@@ -35,7 +34,13 @@ namespace GoogleMapsApi.App.Pages
         {
             ErrorMessage = "";
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
+            {
                 Task.Run(() => GetSrc(addresTo, addresFrom)).Wait();
+                string[] separator ={ " ", ",",".","-"};
+                var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
+                var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
+                ImageDynamicSrc = $"{baseDynamic}key={ApiKey}&origin={options}&destination={destination}";
+            }
             else
                 ErrorMessage = "Введите откуда и куда необходимо построить маршрут";
         }
