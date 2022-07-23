@@ -35,7 +35,7 @@ namespace GoogleMapsApi.App.Pages
             ErrorMessage = "";
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
             {
-                Task.Run(() => GetSrc(addresTo, addresFrom)).Wait();
+                Task.Run(() => GetStaticMapByPolyline(addresTo, addresFrom)).Wait();
                 string[] separator ={ " ", ",",".","-"};
                 var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
@@ -45,7 +45,7 @@ namespace GoogleMapsApi.App.Pages
                 ErrorMessage = "Введите откуда и куда необходимо построить маршрут";
         }
 
-        public async Task GetSrc(string addresTo, string addresFrom)
+        public async Task GetStaticMapByPolyline(string addresTo, string addresFrom)
         {
             DirectionsRequest directionsRequest = new DirectionsRequest()
             {
