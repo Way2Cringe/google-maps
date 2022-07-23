@@ -12,6 +12,8 @@ namespace GoogleMapsApi.App.Pages
     {
         string src = "https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727";
         string baseDynamic = "https://www.google.com/maps/embed/v1/directions?";
+
+        public List<(string Description, string Src)> Steps { get; set; }
         public string ImageSrc { set { src = value; } get { return src; } }
         public string ImageDynamicSrc { set; get; } = "https://www.google.com/maps/embed/v1/directions?origin=24+Sussex+Drive+Ottawa+ON&destination=10+Sussex+Drive+Ottawa+ON&key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI";
         public string ErrorMessage { get; set; }
@@ -47,6 +49,8 @@ namespace GoogleMapsApi.App.Pages
 
         public async Task GetStaticMapByPolyline(string addresTo, string addresFrom)
         {
+            Steps = new List<(string Description, string Src)>();
+
             DirectionsRequest directionsRequest = new DirectionsRequest()
             {
                 Origin = addresFrom,
@@ -62,15 +66,35 @@ namespace GoogleMapsApi.App.Pages
                 IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
 
                 IList<ILocationString> points = new List<ILocationString>();
+
                 foreach (Step step in steps)
-                    foreach (var polyline in step.PolyLine.Points)
-                        points.Add(polyline);
-
-                StaticMapsEngine staticMapGenerator = new StaticMapsEngine();
-
-                string url = staticMapGenerator.GenerateStaticMapURL(new StaticMapRequest(new ImageSize(1000, 1000))
                 {
-                    Pathes = new List<GoogleMapsApi.StaticMaps.Entities.Path>(){ new GoogleMapsApi.StaticMaps.Entities.Path()
+                    IList<ILocationString> stepPoints = new List<ILocationString>();
+                    foreach (var polyline in step.PolyLine.Points)
+                    {
+                        points.Add(polyline);
+                        stepPoints.Add(polyline);
+                    }
+                    Steps.Add((step.HtmlInstructions, GetStaticMapByPoints(stepPoints)));
+                }
+
+                ImageSrc = GetStaticMapByPoints(points);
+
+            }
+            else
+            {
+                ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
+            }
+
+
+        }
+        public string GetStaticMapByPoints(IList<ILocationString> points)
+        {
+            StaticMapsEngine staticMapGenerator = new StaticMapsEngine();
+
+            string url = staticMapGenerator.GenerateStaticMapURL(new StaticMapRequest(new ImageSize(1000, 1000))
+            {
+                Pathes = new List<GoogleMapsApi.StaticMaps.Entities.Path>(){ new GoogleMapsApi.StaticMaps.Entities.Path()
                     {
                         Style = new PathStyle()
                         {
@@ -78,15 +102,9 @@ namespace GoogleMapsApi.App.Pages
                         },
                         Locations = points
                     }},
-                    ApiKey = ApiKey
-                });
-
-                ImageSrc = url;
-            }
-            else
-            {
-                ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
-            }
+                ApiKey = ApiKey
+            });
+            return url;
         }
     }
 }
