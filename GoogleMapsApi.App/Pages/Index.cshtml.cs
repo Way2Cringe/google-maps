@@ -12,12 +12,20 @@ namespace GoogleMapsApi.App.Pages
 {
     public class IndexModel : PageModel
     {
-        string src = "https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727";
         string baseDynamic = "https://www.google.com/maps/embed/v1/directions?";
 
+        public bool CanShow = false;
+
+        Dictionary<string, TravelMode> dictionaryMode = new Dictionary<string, TravelMode>
+        {
+            {"car",  TravelMode.Driving},
+            {"bicycle",  TravelMode.Bicycling},
+            {"walk",  TravelMode.Walking}
+        };
         public List<(string Description, string Src)> Steps { get; set; }
-        public string ImageSrc { set { src = value; } get { return src; } }
-        public string ImageDynamicSrc { set; get; } = "https://www.google.com/maps/embed/v1/directions?origin=24+Sussex+Drive+Ottawa+ON&destination=10+Sussex+Drive+Ottawa+ON&key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI";
+        public string ImageSrc { set; get; }
+        public string ImagePathSrc { set; get; }
+        public string ImageDynamicSrc { set; get; }
         public string ErrorMessage { get; set; }
         private readonly ILogger<IndexModel> _logger;
         string ApiKey
@@ -34,22 +42,25 @@ namespace GoogleMapsApi.App.Pages
 
         }
 
-        public void OnPost(string addresTo, string addresFrom)
+        public void OnPost(string addresTo, string addresFrom, string select)
         {
             ErrorMessage = "";
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
             {
-                Task.Run(() => GetStaticMapByPolyline(addresTo, addresFrom)).Wait();
+                Task.Run(() => GetStaticMapByPolyline(addresTo, addresFrom, select)).Wait();
+                Task.Run(() => GetStaticMapByStep(addresTo, addresFrom, select)).Wait();
                 string[] separator = { " ", ",", ".", "-" };
                 var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 ImageDynamicSrc = $"{baseDynamic}key={ApiKey}&origin={options}&destination={destination}";
+
+                CanShow = true;
             }
             else
                 ErrorMessage = "Введите откуда и куда необходимо построить маршрут";
         }
 
-        public async Task GetStaticMapByPolyline(string addresTo, string addresFrom)
+        public async Task GetStaticMapByPolyline(string addresTo, string addresFrom, string select)
         {
             Steps = new List<(string Description, string Src)>();
 
@@ -58,7 +69,7 @@ namespace GoogleMapsApi.App.Pages
                 Origin = addresFrom,
                 Destination = addresTo,
                 ApiKey = ApiKey,
-                TravelMode = TravelMode.Driving
+                TravelMode = dictionaryMode[select]
             };
 
             DirectionsResponse directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
@@ -81,15 +92,40 @@ namespace GoogleMapsApi.App.Pages
                 }
 
                 ImageSrc = GetStaticMapByPoints(RemoveExtraPoints(points));
-
             }
             else
             {
                 ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
             }
-
-
         }
+
+        public async Task GetStaticMapByStep(string addresTo, string addresFrom, string select)
+        {
+            DirectionsRequest directionsRequest = new DirectionsRequest()
+            {
+                Origin = addresFrom,
+                Destination = addresTo,
+                ApiKey = ApiKey,
+                TravelMode = dictionaryMode[select]
+            };
+
+            DirectionsResponse directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
+
+            if (directions.Routes.Count() > 0)
+            {
+                IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
+
+                IList<ILocationString> path = steps.Select(step => step.StartLocation).ToList<ILocationString>();
+                path.Add(steps.Last().EndLocation);
+
+                ImagePathSrc = GetStaticMapByPoints(RemoveExtraPoints(path));
+            }
+            else
+            {
+                ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
+            }
+        }
+
         public IList<ILocationString> RemoveExtraPoints(IList<ILocationString> points)
         {
             int MAX_AMOUNT = 400;

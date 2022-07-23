@@ -5,7 +5,7 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Добро пожаловать на сайт, где мы вам поможем найти путь между двумя адресами</h1>
+    <h1 class="display-4">Ласкаво просимо на сайт, де ми допоможемо знайти шлях між двома адресами.</h1>
     @*<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
     @*<img src="https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727">*@
     <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
@@ -16,23 +16,73 @@
     <input type="range" value="10" min="0" max="20" oninput="rangeValue.innerText = this.value">
     <p id="rangeValue">10</p>
     </div> *@
-    <form method="post">
-        <input type="text" name="addresFrom" placeholder="From" />
-        <input type="text" name="addresTo" placeholder="To" />
+    <form style="margin:3%" method="post">
+        <input type="text" name="addresFrom" placeholder="From"/>
+        <input type="text" name="addresTo" placeholder="To"/>
+        <select name="select">
+            <option selected value="car">На машине</option>
+            <option value="bicycle">На велосипеде</option>
+            <option value="walk">Пешком</option>
+        </select>
         <input type="submit" value="Send" />
     </form>
-    <img src=@Model.ImageSrc>
-    <iframe width="640" height="640" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
+    @*<figure>
+        <figcaption style="text-align:center">Отображение пути используя PolylineEncoding из Direction</figcaption>
+        <img width="500" height="500" src=@Model.ImageSrc>
+    </figure>
+    <figure style="
+    padding: 10px;
+    display: block;
+    float: left;
+    margin: 0 10px 10px 0;
+    text-align: center;">
+        <figcaption style="text-align:center">Отображение пути используя StartPoints и Endpoints</figcaption>
+        <img width="500" height="500" src=@Model.ImagePathSrc>
+    </figure>
+    <figure style="
+    padding: 10px;
+    display: block;
+    float: left;
+    margin: 0 10px 10px 0;
+    text-align: center;">
+        <figcaption style="text-align:center">Отображение пути используя Maps Embed API </figcaption>
+        <iframe width="500" height="500" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
+    </figure>*@
+    @if (Model.CanShow)
+    {
+        <table style="border: 1px solid transparent" align="center" >
+            <tr>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center">Отображение пути используя PolylineEncoding из Direction</figcaption>
+                        <img width="500" height="500" src=@Model.ImageSrc>
+                    </figure>
+                </td>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center">Отображение пути используя StartPoints и Endpoints</figcaption>
+                        <img width="500" height="500" src=@Model.ImagePathSrc>
+                    </figure>
+                </td>
+            </tr>
+            <tr>
+
+            </tr>
+        </table>
+
+        <figure>
+            <figcaption style="text-align:center">Отображение пути используя Maps Embed API </figcaption>
+            <iframe width="500" height="500" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
+        </figure>
+    }
+
     @if (Model.Steps != null)
         for (int i = 0; i < Model.Steps.Count(); i++)
         {
             var step = Model.Steps[i];
-            <figure style="caption-side: top; margin-top: 10px"><figcaption style = "font-size: 200%"><b>@i.</b> @Html.Raw(step.Description)</figcaption><img src=@step.Src></figure>
+            <figure style="caption-side: top; margin-top: 10px">
+                <figcaption style = "font-size: 200%"><b>@i.</b> @Html.Raw(step.Description)</figcaption>
+                <img src=@step.Src>
+            </figure>
         }
-
-
 </div>
-
-
-
-
