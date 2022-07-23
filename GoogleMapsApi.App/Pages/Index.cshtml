@@ -11,14 +11,14 @@
     <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
 
     <form style="margin:3%" method="post">
-        <input type="text" name="addresFrom" placeholder="From"/>
-        <input type="text" name="addresTo" placeholder="To"/>
+        <input type="text" name="addresFrom" placeholder="Адреса відправки"/>
+        <input type="text" name="addresTo" placeholder="Адреса прибуття"/>
         <select name="select">
-            <option selected value="car">На машине</option>
-            <option value="bicycle">На велосипеде</option>
-            <option value="walk">Пешком</option>
+            <option selected value="car">На машині</option>
+            <option value="bicycle">На велосипеді</option>
+            <option value="walk">Пішки</option>
         </select>
-        <input type="submit" value="Send" />
+        <input type="submit" value="Пошук" />
     </form>
     @if (Model.CanShow)
     {
