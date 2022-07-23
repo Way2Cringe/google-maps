@@ -23,8 +23,11 @@ namespace GoogleMapsApi.App.Pages
             {"walk",  TravelMode.Walking}
         };
         public List<(string Description, string Src)> Steps { get; set; }
-        public string ImageSrc { set; get; }
+        DirectionsResponse directions { get; set; }
+        public string ImagePolylineSrc { set; get; }
+        public string ImageSnapPolylineSrc { set; get; }
         public string ImagePathSrc { set; get; }
+        public string ImageSnapPathSrc { set; get; }
         public string ImageDynamicSrc { set; get; }
         public string ErrorMessage { get; set; }
         private readonly ILogger<IndexModel> _logger;
@@ -47,8 +50,12 @@ namespace GoogleMapsApi.App.Pages
             ErrorMessage = "";
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
             {
-                Task.Run(() => GetStaticMapByPolyline(addresTo, addresFrom, select)).Wait();
-                Task.Run(() => GetStaticMapByStep(addresTo, addresFrom, select)).Wait();
+                Task.Run(() => GetDirectionResponse(addresTo, addresFrom, select)).Wait();
+                ImagePolylineSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByPolyline()), "green");
+                ImagePathSrc = GetStaticMapByPoints(RemoveExtraPoints(GetStaticMapByStep()), "black");
+                var snapPath = Task.Run(()=> GetStaticMapBySnapStep());
+                ImageSnapPathSrc = GetStaticMapByPoints(RemoveExtraPoints(snapPath.Result), "blue");
+                ImageSnapPolylineSrc = GetStaticMapByPoints(RemoveExtraPoints((Task.Run(() => GetStaticMapBySnapPolyline())).Result), "purple");
                 string[] separator = { " ", ",", ".", "-" };
                 var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
@@ -60,25 +67,27 @@ namespace GoogleMapsApi.App.Pages
                 ErrorMessage = "Введите откуда и куда необходимо построить маршрут";
         }
 
-        public async Task GetStaticMapByPolyline(string addresTo, string addresFrom, string select)
+        public async Task GetDirectionResponse(string addresTo, string addresFrom, string select)
         {
-            Steps = new List<(string Description, string Src)>();
-
             DirectionsRequest directionsRequest = new DirectionsRequest()
             {
                 Origin = addresFrom,
                 Destination = addresTo,
                 ApiKey = ApiKey,
+                Language = "uk",
                 TravelMode = dictionaryMode[select]
             };
 
-            DirectionsResponse directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
+            directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
+        }
 
+        public IList<ILocationString> GetStaticMapByPolyline()
+        {
+            Steps = new List<(string Description, string Src)>();
+            IList<ILocationString> points = new List<ILocationString>();
             if (directions.Routes.Count() > 0)
             {
                 IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
-
-                IList<ILocationString> points = new List<ILocationString>();
 
                 foreach (Step step in steps)
                 {
@@ -89,41 +98,77 @@ namespace GoogleMapsApi.App.Pages
                         stepPoints.Add(polyline);
                     }
                     Steps.Add((step.HtmlInstructions, GetStaticMapByPoints(RemoveExtraPoints(stepPoints))));
-                }
-
-                ImageSrc = GetStaticMapByPoints(RemoveExtraPoints(points));
+                }               
             }
             else
             {
                 ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
             }
+
+            return points;
         }
 
-        public async Task GetStaticMapByStep(string addresTo, string addresFrom, string select)
+        public IList<ILocationString> GetStaticMapByStep()
         {
-            DirectionsRequest directionsRequest = new DirectionsRequest()
-            {
-                Origin = addresFrom,
-                Destination = addresTo,
-                ApiKey = ApiKey,
-                TravelMode = dictionaryMode[select]
-            };
-
-            DirectionsResponse directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
-
+            IList<ILocationString> path = new List<ILocationString>();
             if (directions.Routes.Count() > 0)
             {
                 IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
 
-                IList<ILocationString> path = steps.Select(step => step.StartLocation).ToList<ILocationString>();
+                path = steps.Select(step => step.StartLocation).ToList<ILocationString>();
                 path.Add(steps.Last().EndLocation);
-
-                ImagePathSrc = GetStaticMapByPoints(RemoveExtraPoints(path));
             }
             else
             {
                 ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
             }
+            return path;
+        }
+
+        public async Task<IList<ILocationString>> GetStaticMapBySnapStep()
+        {
+            IList<ILocationString> snapPath = new List<ILocationString>();
+            if (directions.Routes.Count() > 0)
+            {
+                IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
+                IList<ILocationString> path = new List<ILocationString>();
+                path = steps.Select(step => step.StartLocation).ToList<ILocationString>();
+                path.Add(steps.Last().EndLocation);
+
+                snapPath = await SnapPointsToRoads(path);
+            }
+            else
+            {
+                ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
+            }
+            return snapPath;
+        }
+
+        public async Task<IList<ILocationString>> GetStaticMapBySnapPolyline()
+        {
+            IList<ILocationString> snapPath = new List<ILocationString>();
+            
+            if (directions.Routes.Count() > 0)
+            {
+                IList<ILocationString> points = new List<ILocationString>();
+                IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
+
+                foreach (Step step in steps)
+                {
+                    IList<ILocationString> stepPoints = new List<ILocationString>();
+                    foreach (var polyline in step.PolyLine.Points)
+                    {
+                        points.Add(polyline);
+                    }
+                }
+
+                snapPath = await SnapPointsToRoads(RemoveExtraPoints(points));
+            }
+            else
+            {
+                ErrorMessage = $"Status: {directions.StatusStr} ErrorMessage:{directions.ErrorMessage}";
+            }
+            return snapPath;
         }
 
         public IList<ILocationString> RemoveExtraPoints(IList<ILocationString> points)
@@ -169,18 +214,18 @@ namespace GoogleMapsApi.App.Pages
                 arrayResponse.Add(result.SnappedPoints.Select(sp => LatLanToLocation(sp.Location)));
             }
             IList<ILocationString> outList = new List<ILocationString>();
-            foreach(var ar in arrayResponse)
+            foreach (var ar in arrayResponse)
                 foreach (var point in ar)
                     outList.Add(point);
             return outList;
-
         }
+
         public ILocationString LatLanToLocation(LatitudeLongitudeLiteral latitudeLongitudeLiteral)
         {
             return new Location(latitudeLongitudeLiteral.Latitude, latitudeLongitudeLiteral.Longitude);
         }
 
-        public string GetStaticMapByPoints(IList<ILocationString> points)
+        public string GetStaticMapByPoints(IList<ILocationString> points, string color = "red")
         {
             StaticMapsEngine staticMapGenerator = new StaticMapsEngine();
 
@@ -190,7 +235,7 @@ namespace GoogleMapsApi.App.Pages
                     {
                         Style = new PathStyle()
                         {
-                            Color = "red"
+                            Color = color
                         },
                         Locations = points
                     }},

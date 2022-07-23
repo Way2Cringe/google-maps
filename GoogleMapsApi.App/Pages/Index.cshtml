@@ -10,12 +10,6 @@
     @*<img src="https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727">*@
     <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
 
-    @*<img src=@Model.ImageSnapSrc>*@
-
-    @*    <div class="range">
-    <input type="range" value="10" min="0" max="20" oninput="rangeValue.innerText = this.value">
-    <p id="rangeValue">10</p>
-    </div> *@
     <form style="margin:3%" method="post">
         <input type="text" name="addresFrom" placeholder="From"/>
         <input type="text" name="addresTo" placeholder="To"/>
@@ -26,52 +20,41 @@
         </select>
         <input type="submit" value="Send" />
     </form>
-    @*<figure>
-        <figcaption style="text-align:center">Отображение пути используя PolylineEncoding из Direction</figcaption>
-        <img width="500" height="500" src=@Model.ImageSrc>
-    </figure>
-    <figure style="
-    padding: 10px;
-    display: block;
-    float: left;
-    margin: 0 10px 10px 0;
-    text-align: center;">
-        <figcaption style="text-align:center">Отображение пути используя StartPoints и Endpoints</figcaption>
-        <img width="500" height="500" src=@Model.ImagePathSrc>
-    </figure>
-    <figure style="
-    padding: 10px;
-    display: block;
-    float: left;
-    margin: 0 10px 10px 0;
-    text-align: center;">
-        <figcaption style="text-align:center">Отображение пути используя Maps Embed API </figcaption>
-        <iframe width="500" height="500" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
-    </figure>*@
     @if (Model.CanShow)
     {
         <table style="border: 1px solid transparent" align="center" >
             <tr>
                 <td>
                     <figure style="margin: 0 10px 10px 0">
-                        <figcaption style="text-align:center">Отображение пути используя PolylineEncoding из Direction</figcaption>
-                        <img width="500" height="500" src=@Model.ImageSrc>
+                        <figcaption style="text-align:center;font-size: 150%">Відображення шляху, використовуючи StartPoints та EndРoints</figcaption>
+                        <img width="500" height="500" src=@Model.ImagePathSrc>
                     </figure>
                 </td>
                 <td>
                     <figure style="margin: 0 10px 10px 0">
-                        <figcaption style="text-align:center">Отображение пути используя StartPoints и Endpoints</figcaption>
-                        <img width="500" height="500" src=@Model.ImagePathSrc>
+                        <figcaption style="text-align:center;font-size: 150%">Відображення шляху, використовуючи  SnapToRoad з StartPoints та Endpoints із Direction</figcaption>
+                        <img width="500" height="500" src=@Model.ImageSnapPathSrc>
                     </figure>
                 </td>
             </tr>
             <tr>
-
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%">Відображення шляху, використовуючи  PolylineEncoding із Direction</figcaption>
+                        <img width="500" height="500" src=@Model.ImagePolylineSrc>
+                    </figure>
+                </td>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%">Відображення шляху, використовуючи  SnapToRoad з PolylineEncoding із Direction</figcaption>
+                        <img width="500" height="500" src=@Model.ImageSnapPolylineSrc>
+                    </figure>
+                </td>
             </tr>
         </table>
 
         <figure>
-            <figcaption style="text-align:center">Отображение пути используя Maps Embed API </figcaption>
+            <figcaption style="text-align:center;font-size: 150%">Відображення шляху, використовуючи  Maps Embed API </figcaption>
             <iframe width="500" height="500" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
         </figure>
     }
@@ -81,7 +64,7 @@
         {
             var step = Model.Steps[i];
             <figure style="caption-side: top; margin-top: 10px">
-                <figcaption style = "font-size: 200%"><b>@i.</b> @Html.Raw(step.Description)</figcaption>
+                <figcaption style = "font-size: 200%"><b>@(i+1).</b> @Html.Raw(step.Description)</figcaption>
                 <img src=@step.Src>
             </figure>
         }
