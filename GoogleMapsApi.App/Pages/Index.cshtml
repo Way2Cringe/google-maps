@@ -9,20 +9,28 @@
     @*<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
     @*<img src="https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727">*@
     <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
-    
+
     @*<img src=@Model.ImageSnapSrc>*@
 
-@*    <div class="range">
-        <input type="range" value="10" min="0" max="20" oninput="rangeValue.innerText = this.value">
-        <p id="rangeValue">10</p>
+    @*    <div class="range">
+    <input type="range" value="10" min="0" max="20" oninput="rangeValue.innerText = this.value">
+    <p id="rangeValue">10</p>
     </div> *@
     <form method="post">
-        <input type="text" name="addresFrom" placeholder="From"/>
-        <input type="text" name="addresTo" placeholder="To"/>
+        <input type="text" name="addresFrom" placeholder="From" />
+        <input type="text" name="addresTo" placeholder="To" />
         <input type="submit" value="Send" />
     </form>
     <img src=@Model.ImageSrc>
     <iframe width="640" height="640" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
+    @if (Model.Steps != null)
+        for (int i = 0; i < Model.Steps.Count(); i++)
+        {
+            var step = Model.Steps[i];
+            <figure style="caption-side: top; margin-top: 10px"><figcaption style = "font-size: 200%"><b>@i.</b> @Html.Raw(step.Description)</figcaption><img src=@step.Src></figure>
+        }
+
+
 </div>
 
 

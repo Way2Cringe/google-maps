@@ -75,10 +75,10 @@ namespace GoogleMapsApi.App.Pages
                         points.Add(polyline);
                         stepPoints.Add(polyline);
                     }
-                    Steps.Add((step.HtmlInstructions, GetStaticMapByPoints(stepPoints)));
+                    Steps.Add((step.HtmlInstructions, GetStaticMapByPoints(RemoveExtraPoints(stepPoints))));
                 }
 
-                ImageSrc = GetStaticMapByPoints(points);
+                ImageSrc = GetStaticMapByPoints(RemoveExtraPoints(points));
 
             }
             else
@@ -87,6 +87,19 @@ namespace GoogleMapsApi.App.Pages
             }
 
 
+        }
+        public IList<ILocationString> RemoveExtraPoints(IList<ILocationString> points)
+        {
+            int MAX_AMOUNT = 400;
+            int Count = points.Count;
+            int Extras = Count - MAX_AMOUNT;
+            if (Extras <= 0) return points;
+            double Chance = 1.0 * Extras / Count;
+            for(int i = 1; i < Extras; i++)
+            {
+                points.RemoveAt(Count - (int)(i / Chance));
+            }
+            return points;
         }
         public string GetStaticMapByPoints(IList<ILocationString> points)
         {
