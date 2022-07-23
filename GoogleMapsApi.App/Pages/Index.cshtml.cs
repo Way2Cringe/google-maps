@@ -1,6 +1,8 @@
 ﻿using GoogleMapsApi.Entities.Common;
 using GoogleMapsApi.Entities.Directions.Request;
 using GoogleMapsApi.Entities.Directions.Response;
+using GoogleMapsApi.Entities.SnapToRoad.Request;
+using GoogleMapsApi.Entities.SnapToRoad.Response;
 using GoogleMapsApi.StaticMaps;
 using GoogleMapsApi.StaticMaps.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +40,7 @@ namespace GoogleMapsApi.App.Pages
             if (!String.IsNullOrEmpty(addresTo) && !String.IsNullOrEmpty(addresFrom))
             {
                 Task.Run(() => GetStaticMapByPolyline(addresTo, addresFrom)).Wait();
-                string[] separator ={ " ", ",",".","-"};
+                string[] separator = { " ", ",", ".", "-" };
                 var options = String.Join('+', addresFrom.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 var destination = String.Join('+', addresTo.Split(separator, StringSplitOptions.RemoveEmptyEntries));
                 ImageDynamicSrc = $"{baseDynamic}key={ApiKey}&origin={options}&destination={destination}";
@@ -95,12 +97,53 @@ namespace GoogleMapsApi.App.Pages
             int Extras = Count - MAX_AMOUNT;
             if (Extras <= 0) return points;
             double Chance = 1.0 * Extras / Count;
-            for(int i = 1; i < Extras; i++)
+            for (int i = 1; i < Extras; i++)
             {
                 points.RemoveAt(Count - (int)(i / Chance));
             }
             return points;
         }
+        public async Task<IList<ILocationString>> SnapPointsToRoads(IList<ILocationString> points)
+        {
+            int HOW_MUCH = 100;
+
+            IList<IEnumerable<ILocationString>> arrayRequest = new List<IEnumerable<ILocationString>>();
+            IList<IEnumerable<ILocationString>> arrayResponse = new List<IEnumerable<ILocationString>>();
+            int count = points.Count();
+            int cycles = count / HOW_MUCH + 1;
+            double step = count * 1.0 / cycles;
+            for (int i = 0; i < cycles; i++)
+            {
+                int start = (int)(i * step);
+                int end = (int)((i + 1) * step);
+                ILocationString[] subarray = new ILocationString[end - start];
+                Array.Copy(points.ToArray(), start, subarray, 0, end - start);
+                arrayRequest.Add(subarray);
+            }
+
+            foreach (var sub in arrayRequest)
+            {
+                SnapToRoadRequest snapToRoadRequest = new SnapToRoadRequest()
+                {
+                    ApiKey = ApiKey,
+                    Path = sub,
+                    Interpolate = false
+                };
+                var result = await GoogleMaps.SnapToRoad.QueryAsync(snapToRoadRequest);
+                arrayResponse.Add(result.SnappedPoints.Select(sp => LatLanToLocation(sp.Location)));
+            }
+            IList<ILocationString> outList = new List<ILocationString>();
+            foreach(var ar in arrayResponse)
+                foreach (var point in ar)
+                    outList.Add(point);
+            return outList;
+
+        }
+        public ILocationString LatLanToLocation(LatitudeLongitudeLiteral latitudeLongitudeLiteral)
+        {
+            return new Location(latitudeLongitudeLiteral.Latitude, latitudeLongitudeLiteral.Longitude);
+        }
+
         public string GetStaticMapByPoints(IList<ILocationString> points)
         {
             StaticMapsEngine staticMapGenerator = new StaticMapsEngine();
