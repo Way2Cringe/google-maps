@@ -9,7 +9,7 @@
     @*<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
     @*<img src="https://maps.google.com/maps/api/staticmap?key=AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI&zoom=14&size=1000x1000&path=color%3Ared%7C40.7422598%2C-74.0061511%7C40.7367061%2C-73.9929726%7C40.7638698%2C-73.9731727">*@
     <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
-    <img src=@Model.ImageSrc>
+    
     @*<img src=@Model.ImageSnapSrc>*@
 
 @*    <div class="range">
@@ -21,8 +21,10 @@
         <input type="text" name="addresTo" placeholder="To"/>
         <input type="submit" value="Send" />
     </form>
+    <img src=@Model.ImageSrc>
+    <iframe width="640" height="640" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
 </div>
 
 
 
-<iframe width="500" height="500" style="border:0" loading="lazy" allowfullscreen src=@Model.ImageDynamicSrc></iframe>
+
