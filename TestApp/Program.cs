@@ -27,9 +27,9 @@ namespace Hackathon
 			DirectionsRequest directionsRequest = new DirectionsRequest()
 			{
 				Origin = "NYC, 5th and 39",
-				Destination = "Philladephia, Chesnut and Wallnut",
+				Destination = "239 N Henry St, Brooklyn",
 				ApiKey = "AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI",
-				TravelMode = TravelMode.Bicycling
+				TravelMode = TravelMode.Driving
 			};
 
 			DirectionsResponse directions = await GoogleMaps.Directions.QueryAsync(directionsRequest);
@@ -42,6 +42,10 @@ namespace Hackathon
 			IEnumerable<Step> steps = directions.Routes.First().Legs.First().Steps;
 			// All start locations
 			IList<ILocationString> path = steps.Select(step => step.StartLocation).ToList<ILocationString>();
+			IList<ILocationString> testP = new List<ILocationString>();
+			foreach (Step step in steps)
+				foreach (var polyline in step.PolyLine.Points)
+					testP.Add(polyline);
 			// also the end location of the last step
 			path.Add(steps.Last().EndLocation);
 
@@ -53,7 +57,7 @@ namespace Hackathon
 
 			SnapToRoadResponse snaps = await GoogleMaps.SnapToRoad.QueryAsync(snapToRoadRequest);
 			IList<ILocationString> path2 = snaps.SnappedPoints.Select(step => new Location(step.Location.Latitude, step.Location.Longitude)).ToList<ILocationString>();
-			;
+			
 
 			string url = staticMapGenerator.GenerateStaticMapURL(new StaticMapRequest(13, new ImageSize(1000, 1000))
 			{
@@ -76,10 +80,11 @@ namespace Hackathon
 			{
 					Color = "red"
 			},
-			Locations = path2
+			Locations = testP
 	}},
 				ApiKey = "AIzaSyDikeBAymgSWrWz-9Y7Danr2mNewZV_MwI"
 			});
+			int t = url2.Length;
 			;
 		}
 

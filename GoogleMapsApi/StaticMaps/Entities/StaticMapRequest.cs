@@ -128,6 +128,11 @@ namespace GoogleMapsApi.StaticMaps.Entities
 			Zoom = zoom;
 			Size = imageSize;
 		}
+		
+		public StaticMapRequest(ImageSize imageSize)
+		{
+			Size = imageSize;
+		}
 
 		public StaticMapRequest(IList<Marker> markers, ImageSize imageSize)
 		{
