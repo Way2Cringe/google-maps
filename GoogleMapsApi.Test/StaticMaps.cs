@@ -17,8 +17,7 @@ namespace GoogleMapsApi.Test
 		public void BasicTest()
 		{
 			// downtown New York City
-			StaticMapRequest request = new(
-				new AddressLocation("Brooklyn Bridge,New York,NY"), 14, new ImageSize(512, 512))
+			StaticMapRequest request = new(	new AddressLocation("Brooklyn Bridge,New York,NY"), 14, new ImageSize(512, 512))
 				{
 					MapType = MapType.Roadmap,
 					Markers =

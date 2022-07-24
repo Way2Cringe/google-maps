@@ -1,0 +1,118 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="item-details-page">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h2>Ласкаво просимо на сайт, де ми допоможемо знайти шлях між двома адресами.</h2>
+
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <form id="contact" action="" method="post">
+            <div class="row">
+              <div class="col-lg-4">
+                <fieldset>
+                  <label for="title">Адреса відправки</label>
+                  <input type="text" name="addresFrom"/>
+                </fieldset>
+              </div>
+              <div class="col-lg-4">
+                <fieldset>
+                  <label for="description">Адреса прибуття</label>
+                  <input type="text" name="addresTo" autocomplete="on" required/>
+                </fieldset>
+              </div>
+              <div class="col-lg-4">
+                <fieldset>
+                  <label for="username">Вид транспорта</label>
+                  <div class="dropdown dropdown-dark" style="width:100%; height:46px">
+                  <select name="select" class="dropdown-select">
+                    <option selected value="car">На машині</option>
+                    <option value="bicycle">На велосипеді</option>
+                    <option value="walk">Пішки</option>
+                    </select>
+                    </div>
+                </fieldset>
+              </div>             
+              
+            </div>
+            <div class="text-center">
+                <fieldset>
+                  <button style="width:300px; height:46px" type="submit" id="form-submit" class="orange-button">Побудувати маршрут</button>
+                </fieldset>
+             </div>
+          </form>
+        </div>      
+      </div>
+    </div>
+  </div>
+<div class="text-center">
+    @*<h1 class="display-4">Ласкаво просимо на сайт, де ми допоможемо знайти шлях між двома адресами.</h1>*@
+    <p style="color:red;font-size:30px">@Model.ErrorMessage</p>
+
+    @*<form style="margin:3%" method="post">
+        <input type="text" name="addresFrom" placeholder="Адреса відправки"/>
+        <input type="text" name="addresTo" placeholder="Адреса прибуття"/>
+        <select name="select">
+            <option selected value="car">На машині</option>
+            <option value="bicycle">На велосипеді</option>
+            <option value="walk">Пішки</option>
+        </select>
+        <input type="submit" value="Пошук" />
+    </form>*@
+    @if (Model.CanShow)
+    {
+        <table style="border: 1px solid transparent" align="center" >
+            <tr>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%;color:#FFFFFF">Відображення шляху, використовуючи StartPoints та EndРoints</figcaption>
+                        <img style="width:500px;height:500px;" src=@Model.ImagePathSrc>
+                    </figure>
+                </td>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%;color:#FFFFFF">Відображення шляху, використовуючи  SnapToRoad з StartPoints та Endpoints із Direction</figcaption>
+                        <img style="width:500px;height:500px;" src=@Model.ImageSnapPathSrc>
+                    </figure>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%;color:#FFFFFF">Відображення шляху, використовуючи  PolylineEncoding із Direction</figcaption>
+                        <img style="width:500px;height:500px;" src=@Model.ImagePolylineSrc>
+                    </figure>
+                </td>
+                <td>
+                    <figure style="margin: 0 10px 10px 0">
+                        <figcaption style="text-align:center;font-size: 150%;color:#FFFFFF">Відображення шляху, використовуючи  SnapToRoad з PolylineEncoding із Direction</figcaption>
+                        <img style="width:500px;height:500px;" src=@Model.ImageSnapPolylineSrc>
+                    </figure>
+                </td>
+            </tr>
+        </table>
+
+        <figure>
+            <figcaption style="text-align:center;font-size: 150%;color:#FFFFFF">Відображення шляху, використовуючи  Maps Embed API </figcaption>
+            <iframe width="500" height="500" style="border:0" loading="lazy" align="middle" src=@Model.ImageDynamicSrc></iframe>
+        </figure>
+    }
+
+    @if (Model.Steps != null)
+        for (int i = 0; i < Model.Steps.Count(); i++)
+        {
+            var step = Model.Steps[i];
+            <figure style="caption-side: top; margin-top: 10px;">
+                <figcaption style = "font-size: 200%;color:#FFFFFF"><b>@(i+1).</b> @Html.Raw(step.Description)</figcaption>
+                <img style="width:500px;height:500px;"src=@step.Src>
+            </figure>
+        }
+</div>
